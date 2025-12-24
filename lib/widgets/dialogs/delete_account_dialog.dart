@@ -122,6 +122,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   final success = await widget.onConfirm(widget.account);
                   if (mounted) {
                     Navigator.pop(
+                      // ignore: use_build_context_synchronously
                       context,
                       success,
                     ); // Devolvemos éxito al cerrar
