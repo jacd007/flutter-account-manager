@@ -12,6 +12,38 @@ Este proyecto es una implementación avanzada de autenticación con Microsoft (A
 
 ---
 
+## 🔑 Guía de Registro en Azure (Microsoft Entra ID)
+
+Si es la primera vez que configuras una aplicación con Microsoft, sigue estos pasos exactos. No necesitas saber programación, solo seguir la interfaz de Azure.
+
+### Paso 1: Crear el Registro
+1. Entra a [Azure Portal](https://portal.azure.com/) e inicia sesión con una cuenta de administrador.
+2. Busca **"Entra ID"** (anteriormente Azure Active Directory) en la barra de búsqueda superior.
+3. En el menú lateral izquierdo, haz clic en **Registros de aplicaciones** y luego en **+ Nuevo registro**.
+4. Ponle un nombre (ej: `TU APP NAME`).
+5. En "Tipos de cuenta compatibles", selecciona **Cuentas en cualquier directorio de organización (Cualquier directorio de Microsoft Entra ID - Multiinquilino)**.
+6. Haz clic en **Registrar**.
+
+### Paso 2: Obtener IDs Básicos
+Al terminar el registro, verás la pantalla de "Información general". Copia estos dos valores y guárdalos (los usarás en el archivo `auth_config.json`):
+- **Id. de aplicación (cliente)**: Este es tu `client_id`.
+- **Id. de directorio (inquilino)**: Este es tu `tenant_id`.
+
+### Paso 3: Configurar Android (Crítico)
+1. En el menú izquierdo, haz clic en **Autenticación**.
+2. Haz clic en **+ Agregar una plataforma** y selecciona **Android**.
+3. **Nombre del paquete**: Escribe exactamente tu `TU PACKAGE NAME` (ej: `com.tusitio.app`).
+4. **Resumen de firma**: Aquí debes poner el Hash SHA-1 de tu proyecto.
+   - *¿Cómo lo obtengo?*: En tu terminal (dentro de la carpeta del proyecto), ejecuta:
+     ```bash
+     keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore | openssl sha1 -binary | openssl base64
+     ```
+   - *Nota*: La contraseña por defecto es `android`.
+5. Azure te generará un **URI de redirección** automático (ej: `msauth://TU_PACKAGE_NAME/TU_HASH`). **Cópialo**, lo necesitarás para el JSON y para el Manifiesto.
+6. Haz clic en **Configurar**.
+
+---
+
 ## 🛠 Guía de Implementación Paso a Paso
 
 Si deseas replicar este sistema en otro proyecto, sigue este orden:
