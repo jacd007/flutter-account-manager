@@ -7,11 +7,33 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final message = args?['message'] ?? 'No login info';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
-      body: Center(child: Text('Login Info: $message')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              args?['message'] ?? 'No login info available',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Session Token:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              args?['token'] ?? 'N/A',
+              style: const TextStyle(
+                color: Colors.blueGrey,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

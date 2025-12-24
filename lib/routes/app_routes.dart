@@ -9,8 +9,8 @@ class AppRoutes {
   static const String home = '/home';
 
   static Map<String, WidgetBuilder> get routes => {
-        splash: (context) => const SplashScreen(),
-        login: (context) => const LoginScreen(),
-        home: (context) => const HomeScreen(),
-      };
+    splash: (context) => const SplashScreen(),
+    login: (context) => const LoginScreen(),
+    home: (context) => const HomeScreen(),
+  };
 }

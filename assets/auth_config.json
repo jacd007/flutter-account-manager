@@ -1,0 +1,16 @@
+{
+  "client_id" : "TODO_REPLACE_WITH_CLIENT_ID",
+  "authorization_user_agent" : "DEFAULT",
+  "redirect_uri" : "msauth://com.example.flutter_account_manager/TODO_REPLACE_WITH_SIGNATURE_HASH",
+  "account_mode" : "SINGLE",
+  "broker_redirect_uri_registered": true,
+  "authorities" : [
+    {
+      "type": "AAD",
+      "audience": {
+        "type": "AzureADMyOrg",
+        "tenant_id" : "TODO_REPLACE_WITH_TENANT_ID"
+      }
+    }
+  ]
+}
