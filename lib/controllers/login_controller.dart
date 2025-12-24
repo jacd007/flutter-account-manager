@@ -4,14 +4,15 @@ import 'package:flutter/services.dart';
 import '../services/account_manager_service.dart';
 import '../routes/app_routes.dart';
 import '../utils/snackbar_utils.dart';
+import '../config/app_config_main_app.dart';
 
 class LoginController extends ChangeNotifier {
   final BuildContext context;
   final AccountManagerService _accountService = AccountManagerService();
 
-  // Estado
   bool isLoading = false;
   bool isRegistering = false;
+  bool get useFakeAuth => AppConfigMainApp.useFakeAuth;
   List<String> savedAccounts = [];
 
   // Configuración MSAL
@@ -39,11 +40,63 @@ class LoginController extends ChangeNotifier {
       return;
     }
 
+    if (useFakeAuth) {
+      await _handleFakeAuthFlow(email, password);
+    } else {
+      await _handleRealAuthFlow(email, password);
+    }
+  }
+
+  Future<void> _handleRealAuthFlow(String email, String password) async {
     if (isRegistering) {
       await loginWithMSAL(email, isNewAccount: true, passwordIfNew: password);
     } else {
       await loginWithMSAL(email);
     }
+  }
+
+  Future<void> _handleFakeAuthFlow(String email, String password) async {
+    await _loginFake(
+      email,
+      isNewAccount: isRegistering,
+      passwordIfNew: password,
+    );
+  }
+
+  Future<void> _loginFake(
+    String email, {
+    bool isNewAccount = false,
+    String? passwordIfNew,
+  }) async {
+    isLoading = true;
+    notifyListeners();
+
+    await Future.delayed(const Duration(seconds: 2)); // Simular carga
+
+    final msEmail = email.contains('@') ? email : "$email@fake.com";
+    const msToken = "FAKE_TOKEN_12345_DEVELOPMENT_ONLY";
+
+    // En modo FAKE, siempre registramos la cuenta localmente para verla en la lista
+    if (passwordIfNew != null) {
+      await _accountService.addAccount(msEmail, passwordIfNew);
+    }
+
+    SnackBarUtils.showSuccess(context, '[MODO FAKE] Autenticación Exitosa.');
+
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.home,
+        arguments: {
+          'message': 'BIENVENIDO (MODO PRUEBA), $msEmail',
+          'token': msToken,
+        },
+      );
+    }
+
+    isLoading = false;
+    _loadSavedAccounts();
+    notifyListeners();
   }
 
   Future<void> loginWithMSAL(

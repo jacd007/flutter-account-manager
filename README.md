@@ -12,6 +12,25 @@ Este proyecto es una implementación avanzada de autenticación con Microsoft (A
 
 ---
 
+## 🛠 Modos de Ejecución (Debug vs Release)
+
+El proyecto cuenta con un sistema de conmutación lógica para facilitar las pruebas sin depender siempre de la infraestructura de Microsoft.
+
+### **Modo Debug (Pruebas Simuladas)**
+Ideal para diseño de UI, pruebas de flujo o cuando no tienes conexión a Azure.
+- **Activación**: Cambia `useFakeAuth = true` en [app_config_main_app.dart](file:///home/jacd/FlutterProjects/personales/flutter_account_manager/lib/config/app_config_main_app.dart).
+- **Indicador**: Se activa el banner de **"DEBUG"** en la esquina superior derecha y la UI de login se vuelve **Naranja**.
+- **Persistencia**: Incluso en este modo, el login **registra la cuenta** en el Account Manager de Android para simular el comportamiento real de guardado.
+- **Flujo**: No consume APIs de Microsoft; simula éxito tras 2 segundos.
+
+### **Modo Release (Producción Real)**
+Es el estado por defecto para uso real.
+- **Activación**: Asegúrate de que `useFakeAuth = false` en la configuración.
+- **Indicador**: El banner de "DEBUG" desaparece y la UI de login usa el color **Azul** estándar.
+- **Flujo**: Realiza la autenticación completa con MFA a través de MSAL y el portal de Microsoft.
+
+---
+
 ## 🔑 Guía de Registro en Azure (Microsoft Entra ID)
 
 Si es la primera vez que configuras una aplicación con Microsoft, sigue estos pasos exactos. No necesitas saber programación, solo seguir la interfaz de Azure.

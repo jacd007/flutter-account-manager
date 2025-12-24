@@ -109,33 +109,9 @@ class _LoginScreenState extends State<LoginScreen> {
             obscureText: true,
           ),
           const SizedBox(height: 8),
-          CheckboxListTile(
-            title: const Text("Registrar como nueva cuenta"),
-            value: _controller.isRegistering,
-            onChanged: (val) => _controller.toggleRegistering(val ?? false),
-            controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: EdgeInsets.zero,
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () => _controller.handleAuthAction(
-                emailController.text.trim(),
-                passwordController.text.trim(),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(
-                _controller.isRegistering
-                    ? 'Registrar y Verificar'
-                    : 'Iniciar Sesión',
-              ),
-            ),
-          ),
+          _controller.useFakeAuth
+              ? _buildFakeAuthWidgets()
+              : _buildRealAuthWidgets(),
           const SizedBox(height: 30),
           MarkTextWidget.simple(
             text: 'Ya estoy registrado, iniciar con una *cuenta registrada*',
@@ -151,6 +127,71 @@ class _LoginScreenState extends State<LoginScreen> {
             styleNormal: const TextStyle(color: Colors.black),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRealAuthWidgets() {
+    return Column(
+      children: [
+        CheckboxListTile(
+          title: const Text("Registrar como nueva cuenta"),
+          value: _controller.isRegistering,
+          onChanged: (val) => _controller.toggleRegistering(val ?? false),
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+        ),
+        const SizedBox(height: 16),
+        _buildSubmitButton(
+          label: _controller.isRegistering
+              ? 'Registrar y Verificar'
+              : 'Iniciar Sesión Real',
+          color: Colors.blue,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFakeAuthWidgets() {
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.0),
+          child: Center(
+            child: Text(
+              "⚠️ MODO DE PRUEBA ACTIVO ⚠️\n(AppConfigMainApp.useFakeAuth = true)",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+        _buildSubmitButton(
+          label: 'Simular Inicio (PROBAR FLUJO)',
+          color: Colors.orange,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton({required String label, required Color color}) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () => _controller.handleAuthAction(
+          emailController.text.trim(),
+          passwordController.text.trim(),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+        ),
+        child: Text(label),
       ),
     );
   }
