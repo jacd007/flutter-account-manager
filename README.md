@@ -1,25 +1,23 @@
-# Microsoft Account Manager - Galaxy One Auth
+# Microsoft Account Manager - TU APP NAME
 
 Este proyecto es una implementación avanzada de autenticación con Microsoft (Azure AD) para Flutter, diseñada específicamente para eliminar la fricción del usuario al utilizar el **Android Account Manager** para la persistencia de cuentas y **MSAL (Microsoft Authentication Library)** para la seguridad de grado empresarial, incluyendo el manejo de MFA (Multi-Factor Authentication).
 
-## 🚀 Concepto Principal
-A diferencia de otras apps que abren el navegador cada vez que intentas iniciar sesión, esta solución:
-1. **Registra** la cuenta directamente en el sistema operativo Android.
-2. **Persiste** el nombre de usuario localmente.
-3. **Verifica SILENCIOSAMENTE** la sesión con Microsoft siempre que sea posible.
-4. **Maneja MFA** de forma nativa sin perder el contexto de la aplicación.
+## 🚀 Funcionalidades Principales
+
+1. **Autenticación Browserless**: Utiliza MSAL para validar identidades de Microsoft de forma nativa.
+2. **Persistencia en el Sistema**: Registra las cuentas directamente en el gestor de cuentas de Android (Ajustes > Cuentas).
+3. **Arquitectura Modos**: Código altamente organizado separando la lógica (Controller) de la interfaz (Screens/Widgets).
+4. **Eliminación Segura**: Flujo de borrado de cuentas con doble confirmación y conteo regresivo de 5 segundos para evitar accidentes.
+5. **Manejo de Errores Profesional**: Logs en color para desarrolladores y mensajes simplificados para el usuario.
 
 ---
 
-## 🛠 Instalación Paso a Paso (Para Desarrolladores)
+## 🛠 Guía de Implementación Paso a Paso
 
-### 1. Requisitos Previos
-- Flutter SDK instalado.
-- Un proyecto registrado en **Azure Portal** (App Registration).
-- La firma de tu app (SHA-1) registrada en la configuración de Android en Azure.
+Si deseas replicar este sistema en otro proyecto, sigue este orden:
 
-### 2. Configuración de Credenciales
-Edita el archivo `assets/auth_config.json`:
+### 1. Configuración de Credenciales
+**Archivo:** `assets/auth_config.json` [CREAR]
 ```json
 {
   "client_id" : "TU_CLIENT_ID",
@@ -28,52 +26,55 @@ Edita el archivo `assets/auth_config.json`:
 }
 ```
 
-### 3. Configuración del Manifiesto Android
-En `android/app/src/main/AndroidManifest.xml`, asegúrate de que el `intent-filter` de la actividad de MSAL coincida exactamente con tu `redirect_uri`.
+### 2. Configuración Android Nativa
+**Archivo:** `android/app/src/main/AndroidManifest.xml` [EDITAR]
+- **Línea ~10**: Agrega permisos: `GET_ACCOUNTS`, `AUTHENTICATE_ACCOUNTS`, `MANAGE_ACCOUNTS`.
+- **Dentro de `<application>`**: Registra el `AuthenticatorService`.
+- **Callback MSAL**: Asegúrate de que el `intent-filter` de la actividad de MSAL tenga el `scheme` y `host` que coincidan con tu `redirect_uri`.
 
-### 4. Compilación
-```bash
-flutter pub get
-flutter run
-```
+**Archivo:** `android/app/src/main/res/xml/authenticator.xml` [CREAR]
+- Define el `accountType` como `TU_PACKAGE_NAME`.
 
----
+**Archivo:** `android/app/src/main/kotlin/.../MainActivity.kt` [EDITAR]
+- Implementa el `MethodChannel` con los casos: `addAccount`, `getAccounts`, `getPassword`, `removeAccount`.
 
-## 🔍 Guía de Errores y Soluciones (Troubleshooting)
+### 3. Estructura de Archivos Flutter (lib/)
 
-Aquí se detallan los errores más comunes divididos por su origen técnico.
+#### Capa de Datos y Servicios
+- **`lib/services/account_manager_service.dart`**: El puente directo con el código nativo de Android.
+- **`lib/utils/snackbar_utils.dart`**: Gestiona las notificaciones visuales y los logs en rojo.
 
-### 1. Errores de Configuración (Config Error)
-| Error | Por qué sucede | Cómo solucionarlo |
-| :--- | :--- | :--- |
-| `Msal Error: configuration_error` | El `auth_config.json` tiene un formato inválido o faltan campos. | Revisa que no haya comas de más y que el `client_id` sea correcto. |
-| `Msal Error: redirect_uri_mismatch` | El URI de redirección definido en Azure Portal no coincide con el de `AndroidManifest.xml`. | Copia el URI de Azure Portal y pégalo en el archivo JSON y en el Manifiesto. |
+#### Capa de Lógica (Controllers)
+- **`lib/controllers/login_controller.dart`**: Orquestador de la autenticación. No tiene UI, solo lógica y estado (`ChangeNotifier`).
 
-### 2. Errores de Autenticación (Auth Flow)
-| Error | Por qué sucede | Cómo solucionarlo |
-| :--- | :--- | :--- |
-| `TIMEOUT` (En pantalla de carga) | El usuario tardó más de 1 minuto en resolver el MFA o la ventana se quedó bloqueada. | El sistema cancela la operación automáticamente por seguridad. Reintenta la acción con una conexión estable. |
-| `user_cancelled` | El usuario cerró la ventana de Microsoft antes de terminar de poner su clave. | Esto es un comportamiento esperado. El log mostrará el error en rojo, pero para el usuario solo se cerrará el loading. |
-
-### 3. Errores del Sistema de Cuentas (Android Account Manager)
-| Error | Por qué sucede | Cómo solucionarlo |
-| :--- | :--- | :--- |
-| `Error al registrar en el sistema local` | Intentas registrar una cuenta que ya existe dentro de la configuración de "Cuentas" del teléfono Android. | Ve a Ajustes > Cuentas > Galaxy One Auth y elimina la cuenta manualmente antes de re-registrar. |
-| `account_type_not_found` | El sistema no reconoce el tipo de cuenta `com.galaxy.one.auth`. | Revisa que el servicio `AuthenticatorService` esté correctamente registrado en el `AndroidManifest.xml`. |
+#### Capa de Interfaz (UI)
+- **`lib/widgets/sheets/account_selection_sheet.dart`**: El modal que lista las cuentas guardadas.
+- **`lib/widgets/dialogs/delete_account_dialog.dart`**: Diálogo con el contador de 5 segundos y validación irreversible.
+- **`lib/screens/login_screen.dart`**: Vista principal simplificada que utiliza el controlador.
 
 ---
 
-## 🏗 Arquitectura del Proyecto
+## 🔍 Troubleshooting (Solución de Problemas)
 
-Para los desarrolladores que quieran profundizar:
+### 1. Errores de Configuración
+| Error | Por qué sucede | Cómo solucionarlo |
+| :--- | :--- | :--- |
+| `Msal Error: configuration_error` | El `auth_config.json` tiene un error de sintaxis. | Revisa comas y comillas en el JSON. |
+| `redirect_uri_mismatch` | Azure no reconoce el URI enviado. | Verifica que el HASH de la firma en Azure sea idéntico al del JSON. |
 
-- **`lib/services/account_manager_service.dart`**: El puente (MethodChannel) que pide favores al código nativo (Kotlin).
-- **`android/app/src/main/kotlin/.../Authenticator.kt`**: La clase que implementa la interfaz `AbstractAccountAuthenticator` requerida por Android.
-- **`lib/screens/login_screen.dart`**: Contiene la lógica del "Timed Auth Result". Si la operación de Microsoft no responde en 60s, corta la ejecución para evitar que la UI se quede colgada para siempre.
+### 2. Errores del Sistema
+| Error | Por qué sucede | Cómo solucionarlo |
+| :--- | :--- | :--- |
+| `Error al registrar local` | La cuenta ya existe en el teléfono. | Usa el nuevo flujo de **Eliminación Segura** para borrarla antes de re-intentar. |
+| `TIMEOUT` | El usuario no completó el inicio de sesión en < 1 min. | Reintenta la operación con una conexión más estable. |
 
-### ¿Cómo se ven los errores en desarrollo?
-Hemos implementado un sistema de logs en color:
-- **Rojo (`\x1B[31m`)**: Errores críticos de plataforma o red.
-- **Normal**: Flujo de información exitosa.
+---
 
-Si ves un error rojo en tu consola de VS Code o Android Studio, revisa los `technicalDetails` que imprimimos antes de reportar un bug.
+## 🏗 Arquitectura de Limpieza
+Hemos reducido `LoginScreen.dart` de 450 a 130 líneas delegando la responsabilidad a:
+- **`LoginController`**: Maneja el `isLoading` y llama a MSAL.
+- **`DeleteAccountDialog`**: Se encarga de la lógica del cronómetro de 5 segundos.
+
+### Logs de Desarrollo
+- **Rojo (`\x1B[31m`)**: Errores críticos. Revisa la consola si algo falla silenciosamente.
+- **Mensaje**: El usuario verá una SnackBar amigable mientras tú ves el error real.
