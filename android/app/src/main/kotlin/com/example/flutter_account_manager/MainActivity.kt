@@ -39,6 +39,14 @@ class MainActivity: FlutterActivity() {
                 } else {
                     result.error("INVALID_ARGS", "Falta el nombre de usuario.", null)
                 }
+            } else if (call.method == "removeAccount") {
+                val username = call.argument<String>("username")
+                if (username != null) {
+                    val removed = removeAccount(username)
+                    result.success(removed)
+                } else {
+                    result.error("INVALID_ARGS", "Falta el nombre de usuario.", null)
+                }
             } else {
                 result.notImplemented()
             }
@@ -68,5 +76,22 @@ class MainActivity: FlutterActivity() {
         
         val dummyBundle = Bundle()
         return accountManager.addAccountExplicitly(account, password, dummyBundle)
+    }
+
+    private fun removeAccount(username: String): Boolean {
+        val accountManager = AccountManager.get(this)
+        val accounts = accountManager.getAccountsByType("com.example.flutter_account_manager")
+        val account = accounts.find { it.name == username }
+        return if (account != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+                accountManager.removeAccountExplicitly(account)
+            } else {
+                // Deprecated but needed for older versions
+                @Suppress("DEPRECATION")
+                accountManager.removeAccount(account, null, null).result
+            }
+        } else {
+            false
+        }
     }
 }

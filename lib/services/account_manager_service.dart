@@ -41,4 +41,16 @@ class AccountManagerService {
       return null;
     }
   }
+
+  Future<bool> removeAccount(String username) async {
+    try {
+      final bool result = await _channel.invokeMethod('removeAccount', {
+        'username': username,
+      });
+      return result;
+    } on PlatformException catch (e) {
+      developer.log("Failed to remove account: '${e.message}'.");
+      return false;
+    }
+  }
 }
