@@ -71,11 +71,19 @@ class MainActivity: FlutterActivity() {
     }
 
     private fun addAccount(username: String, password: String): Boolean {
-        val accountManager = AccountManager.get(this)
-        val account = Account(username, "com.example.flutter_account_manager")
-        
-        val dummyBundle = Bundle()
-        return accountManager.addAccountExplicitly(account, password, dummyBundle)
+        try {
+            val accountManager = AccountManager.get(this)
+            val account = Account(username, "com.example.flutter_account_manager")
+            
+            val dummyBundle = Bundle()
+            val success = accountManager.addAccountExplicitly(account, password, dummyBundle)
+            
+            android.util.Log.d("MainActivity", "Add account attempt for $username: success=$success")
+            return success
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error adding account", e)
+            return false
+        }
     }
 
     private fun removeAccount(username: String): Boolean {

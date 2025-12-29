@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:msal_auth/msal_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../services/account_manager_service.dart';
 import '../routes/app_routes.dart';
 import '../utils/snackbar_utils.dart';
@@ -80,7 +81,11 @@ class LoginController extends ChangeNotifier {
 
     // En modo FAKE, siempre registramos la cuenta localmente para verla en la lista
     if (passwordIfNew != null) {
-      await _accountService.addAccount(msEmail, passwordIfNew);
+      if (await Permission.contacts.request().isGranted) {
+        await _accountService.addAccount(msEmail, passwordIfNew);
+      } else {
+        SnackBarUtils.showError(context, 'Sin permiso de contactos.');
+      }
     }
 
     SnackBarUtils.showSuccess(context, '[MODO FAKE] Autenticación Exitosa.');
@@ -110,7 +115,7 @@ class LoginController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final pca = await SingleAccountPca.create(
+      final pca = await MultipleAccountPca.create(
         clientId: _clientId,
         androidConfig: AndroidConfig(
           configFilePath: "assets/auth_config.json",
@@ -119,7 +124,7 @@ class LoginController extends ChangeNotifier {
       );
 
       final result = await Future.any([
-        pca.acquireToken(scopes: ["User.Read"], loginHint: email),
+        pca.acquireToken(scopes: ["User.Read"], prompt: Prompt.login),
         Future.delayed(const Duration(minutes: 1)).then((_) => throw 'TIMEOUT'),
       ]);
 
@@ -127,12 +132,22 @@ class LoginController extends ChangeNotifier {
       final msToken = result.accessToken;
 
       if (isNewAccount && passwordIfNew != null) {
-        final success = await _accountService.addAccount(
-          msEmail ?? email,
-          passwordIfNew,
-        );
-        if (!success) {
-          SnackBarUtils.showError(context, 'Error al registrar localmente.');
+        // En Android 13+, a veces es necesario solicitar permiso explícito
+        // aunque seamos dueños del accountType.
+        if (await Permission.contacts.request().isGranted) {
+          final success = await _accountService.addAccount(
+            msEmail ?? email,
+            passwordIfNew,
+          );
+          if (!success) {
+            SnackBarUtils.showError(context, 'Error al registrar localmente.');
+            return;
+          }
+        } else {
+          SnackBarUtils.showError(
+            context,
+            'Permiso de contactos denegado. No se puede guardar en el sistema.',
+          );
           return;
         }
       }

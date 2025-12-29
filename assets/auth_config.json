@@ -1,8 +1,8 @@
 {
   "client_id" : "TODO_REPLACE_WITH_CLIENT_ID",
-  "authorization_user_agent" : "DEFAULT",
+  "authorization_user_agent" : "WEBVIEW",
   "redirect_uri" : "msauth://com.example.flutter_account_manager/TODO_REPLACE_WITH_SIGNATURE_HASH",
-  "account_mode" : "SINGLE",
+  "account_mode" : "MULTIPLE",
   "broker_redirect_uri_registered": true,
   "authorities" : [
     {
