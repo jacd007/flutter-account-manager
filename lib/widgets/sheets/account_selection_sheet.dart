@@ -4,8 +4,13 @@ import '../dialogs/delete_account_dialog.dart';
 
 class AccountSelectionSheet extends StatelessWidget {
   final LoginController controller;
+  final bool showDeleteButton;
 
-  const AccountSelectionSheet({super.key, required this.controller});
+  const AccountSelectionSheet({
+    super.key,
+    required this.controller,
+    this.showDeleteButton = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,17 +56,19 @@ class AccountSelectionSheet extends StatelessWidget {
                             color: Colors.blue,
                           ),
                           title: Text(account),
-                          trailing: IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.red,
-                            ),
-                            onPressed: () => DeleteAccountDialog.show(
-                              context,
-                              account,
-                              controller.removeAccount,
-                            ),
-                          ),
+                          trailing: showDeleteButton
+                              ? IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => DeleteAccountDialog.show(
+                                    context,
+                                    account,
+                                    controller.removeAccount,
+                                  ),
+                                )
+                              : null,
                           onTap: () {
                             Navigator.pop(context); // Close sheet
                             controller.loginWithMSAL(loginHint: account);
