@@ -23,108 +23,12 @@ class _LoginScreenState extends State<LoginScreen> {
     _controller.addListener(_updateState);
   }
 
+  /// Update state
   void _updateState() {
     if (mounted) setState(() {});
   }
 
-  void _showAccountSelectionSheet() async {
-    final result = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => AccountSelectionSheet(controller: _controller),
-    );
-
-    if (result == true && _controller.savedAccounts.isEmpty && mounted) {
-      AppToast.error(context, 'No quedan cuentas registradas.');
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_updateState);
-    _controller.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Flutter Account Manager')),
-      body: _controller.isLoading ? _buildLoading() : _buildSelectionUI(),
-    );
-  }
-
-  Widget _buildLoading() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text("Autenticando..."),
-          Text(
-            "(Por favor espere)",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSelectionUI() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Icon(Icons.account_balance, size: 80, color: Colors.blue),
-            const SizedBox(height: 48),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.person_add),
-              label: const Text("Iniciar sesión con CUENTA NUEVA"),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                textStyle: const TextStyle(fontSize: 16),
-              ),
-              onPressed: _showNewAccountDialog,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.history),
-              label: const Text("Iniciar sesión con CUENTA REGISTRADA"),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                textStyle: const TextStyle(fontSize: 16),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.blue,
-                side: const BorderSide(color: Colors.blue),
-              ),
-              onPressed: _showAccountSelectionSheet,
-            ),
-            if (_controller.useFakeAuth) ...[
-              const SizedBox(height: 40),
-              const Text(
-                "⚠️ MODO DE PRUEBA ACTIVO ⚠️",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.orange,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
+  /// Show dialog for new account
   Future<void> _showNewAccountDialog() async {
     emailController.clear();
     passwordController.clear();
@@ -193,6 +97,107 @@ class _LoginScreenState extends State<LoginScreen> {
             child: const Text("Iniciar Sesión"),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Show account selection sheet
+  Future<void> _showAccountSelectionSheet() async {
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => AccountSelectionSheet(controller: _controller),
+    );
+
+    if (result == true && _controller.savedAccounts.isEmpty && mounted) {
+      AppToast.error(context, 'No quedan cuentas registradas.');
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_updateState);
+    _controller.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // appBar: AppBar(title: const Text('Flutter Account Manager')),
+      body: _controller.isLoading ? _buildLoading() : _buildSelectionUI(),
+    );
+  }
+
+  /// Build loading widget
+  Widget _buildLoading() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text("Autenticando..."),
+          Text(
+            "(Por favor espere)",
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build selection UI
+  Widget _buildSelectionUI() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Icon(Icons.account_balance, size: 80, color: Colors.blue),
+            const SizedBox(height: 48),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.person_add),
+              label: const Text("Iniciar sesión con CUENTA NUEVA"),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              onPressed: _showNewAccountDialog,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.history),
+              label: const Text("Iniciar sesión con CUENTA REGISTRADA"),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                textStyle: const TextStyle(fontSize: 16),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.blue,
+                side: const BorderSide(color: Colors.blue),
+              ),
+              onPressed: _showAccountSelectionSheet,
+            ),
+            if (_controller.useFakeAuth) ...[
+              const SizedBox(height: 40),
+              const Text(
+                "⚠️ MODO DE PRUEBA ACTIVO ⚠️",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -21,23 +21,10 @@ class AccountSelectionSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Cuentas Registradas',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
+          // Title
+          _buildTitle(context),
           const Divider(),
+          // List of accounts
           Flexible(
             child: SingleChildScrollView(
               child: Column(
@@ -50,30 +37,7 @@ class AccountSelectionSheet extends StatelessWidget {
                         ),
                       ]
                     : controller.savedAccounts.map((account) {
-                        return ListTile(
-                          leading: const Icon(
-                            Icons.account_circle,
-                            color: Colors.blue,
-                          ),
-                          title: Text(account),
-                          trailing: showDeleteButton
-                              ? IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () => DeleteAccountDialog.show(
-                                    context,
-                                    account,
-                                    controller.removeAccount,
-                                  ),
-                                )
-                              : null,
-                          onTap: () {
-                            Navigator.pop(context); // Close sheet
-                            controller.loginWithMSAL(loginHint: account);
-                          },
-                        );
+                        return _buildItem(account, context);
                       }).toList(),
               ),
             ),
@@ -81,6 +45,48 @@ class AccountSelectionSheet extends StatelessWidget {
           const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  /// Build title widget
+  Widget _buildTitle(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Cuentas Registradas',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build item widget
+  Widget _buildItem(String account, BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.account_circle, color: Colors.blue),
+      title: Text(account),
+      trailing: showDeleteButton
+          ? IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () => DeleteAccountDialog.show(
+                context,
+                account,
+                controller.removeAccount,
+              ),
+            )
+          : null,
+      onTap: () {
+        Navigator.pop(context); // Close sheet
+        controller.loginWithMSAL(loginHint: account);
+      },
     );
   }
 }
