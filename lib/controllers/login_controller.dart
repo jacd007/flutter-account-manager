@@ -52,9 +52,13 @@ class LoginController extends ChangeNotifier {
 
   Future<void> _handleRealAuthFlow(String email, String password) async {
     if (isRegistering) {
-      await loginWithMSAL(email, isNewAccount: true, passwordIfNew: password);
+      await loginWithMSAL(
+        loginHint: email,
+        isNewAccount: true,
+        passwordIfNew: password,
+      );
     } else {
-      await loginWithMSAL(email);
+      await loginWithMSAL(loginHint: email);
     }
   }
 
@@ -106,8 +110,8 @@ class LoginController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loginWithMSAL(
-    String email, {
+  Future<void> loginWithMSAL({
+    String? loginHint,
     bool isNewAccount = false,
     String? passwordIfNew,
   }) async {
@@ -123,8 +127,14 @@ class LoginController extends ChangeNotifier {
         ),
       );
 
+      final prompt = isNewAccount ? Prompt.login : Prompt.selectAccount;
+
       final result = await Future.any([
-        pca.acquireToken(scopes: ["User.Read"], prompt: Prompt.login),
+        pca.acquireToken(
+          scopes: ["User.Read"],
+          prompt: prompt,
+          loginHint: loginHint,
+        ),
         Future.delayed(const Duration(minutes: 1)).then((_) => throw 'TIMEOUT'),
       ]);
 
@@ -132,23 +142,21 @@ class LoginController extends ChangeNotifier {
       final msToken = result.accessToken;
 
       if (isNewAccount && passwordIfNew != null) {
-        // En Android 13+, a veces es necesario solicitar permiso explícito
-        // aunque seamos dueños del accountType.
         if (await Permission.contacts.request().isGranted) {
           final success = await _accountService.addAccount(
-            msEmail ?? email,
+            msEmail ?? loginHint ?? "unknown",
             passwordIfNew,
           );
           if (!success) {
             SnackBarUtils.showError(context, 'Error al registrar localmente.');
-            return;
+            // Proceed despite error
           }
         } else {
           SnackBarUtils.showError(
             context,
             'Permiso de contactos denegado. No se puede guardar en el sistema.',
           );
-          return;
+          // Proceed despite error
         }
       }
 

@@ -64,7 +64,7 @@ class AccountSelectionSheet extends StatelessWidget {
                           ),
                           onTap: () {
                             Navigator.pop(context); // Close sheet
-                            controller.loginWithMSAL(account);
+                            controller.loginWithMSAL(loginHint: account);
                           },
                         );
                       }).toList(),
