@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (result == true && _controller.savedAccounts.isEmpty && mounted) {
-      SnackBarUtils.showError(context, 'No quedan cuentas registradas.');
+      AppToast.error(context, 'No quedan cuentas registradas.');
     }
   }
 
@@ -187,10 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 }
               } else {
-                SnackBarUtils.showError(
-                  context,
-                  "Por favor complete los campos",
-                );
+                AppToast.error(context, "Por favor complete los campos");
               }
             },
             child: const Text("Iniciar Sesión"),

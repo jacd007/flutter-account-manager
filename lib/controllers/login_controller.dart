@@ -39,7 +39,7 @@ class LoginController extends ChangeNotifier {
 
   Future<void> handleAuthAction(String email, String password) async {
     if (email.isEmpty || password.isEmpty) {
-      SnackBarUtils.showError(context, 'Ingresa tus credenciales.');
+      AppToast.error(context, 'Ingresa tus credenciales.');
       return;
     }
 
@@ -88,11 +88,11 @@ class LoginController extends ChangeNotifier {
       if (await Permission.contacts.request().isGranted) {
         await _accountService.addAccount(msEmail, passwordIfNew);
       } else {
-        SnackBarUtils.showError(context, 'Sin permiso de contactos.');
+        AppToast.error(context, 'Sin permiso de contactos.');
       }
     }
 
-    SnackBarUtils.showSuccess(context, '[MODO FAKE] Autenticación Exitosa.');
+    AppToast.success(context, '[MODO FAKE] Autenticación Exitosa.');
 
     if (context.mounted) {
       Navigator.pushReplacementNamed(
@@ -148,11 +148,11 @@ class LoginController extends ChangeNotifier {
             passwordIfNew,
           );
           if (!success) {
-            SnackBarUtils.showError(context, 'Error al registrar localmente.');
+            AppToast.error(context, 'Error al registrar localmente.');
             // Proceed despite error
           }
         } else {
-          SnackBarUtils.showError(
+          AppToast.error(
             context,
             'Permiso de contactos denegado. No se puede guardar en el sistema.',
           );
@@ -160,27 +160,27 @@ class LoginController extends ChangeNotifier {
         }
       }
 
-      SnackBarUtils.showSuccess(context, 'Autenticación Exitosa.');
+      AppToast.success(context, 'Autenticación Exitosa.');
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.home,
         arguments: {'message': 'Bienvenido, $msEmail', 'token': msToken},
       );
     } on PlatformException catch (e) {
-      SnackBarUtils.showError(
+      AppToast.error(
         context,
         'Error de Microsoft.',
         technicalDetails: 'Msal: ${e.message} (${e.code})',
       );
     } catch (e) {
       if (e == 'TIMEOUT') {
-        SnackBarUtils.showError(
+        AppToast.error(
           context,
           'Tiempo agotado.',
           technicalDetails: 'MSAL Timeout 1min',
         );
       } else {
-        SnackBarUtils.showError(
+        AppToast.error(
           context,
           'Fallo al iniciar sesión.',
           technicalDetails: '$e',
